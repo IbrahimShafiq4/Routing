@@ -1,0 +1,124 @@
+import { Component, OnInit } from '@angular/core';
+import { ServersService } from './servers.service';
+import { ActivatedRoute, Router } from '@angular/router';
+
+@Component({
+  selector: 'app-servers',
+  templateUrl: './servers.component.html',
+  styleUrls: ['./servers.component.css']
+})
+export class ServersComponent implements OnInit {
+  public servers: { id: number, name: string, status: string }[] = [];
+
+  userId!: number;
+
+  constructor(
+    private serversService: ServersService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) { }
+
+  ngOnInit() {
+    this.servers = this.serversService.getServers();
+  }
+
+  onLoadServers(id: number) {
+    this.userId = id;
+    this.serversService.changeServer(++id);
+    console.log(`userId is ${this.userId}`)
+    console.log(`Id is ${id}`)
+  }
+
+  onReload() {
+    // this.router.navigate(['/servers'], {relativeTo: this.activatedRoute})
+  }
+}
+
+
+that was the servers.ts
+
+
+<div class="row">
+  <div class="col-xs-12 col-sm-4">
+    <div class="list-group">
+      <a
+        [routerLink]="['/servers', 5, 'edit']"
+        [queryParams]="{allowEdit: '1', theme: 'light'}"
+        [fragment]="'loading'"
+        href="#"
+          class="list-group-item"
+          *ngFor="let server of servers; let i = index" 
+          (click)="onLoadServers(i)"
+        >
+        {{ server.name }}
+      </a>
+    </div>
+  </div>
+  <div class="col-xs-12 col-sm-4">
+    <a (click)="onReload()" style="cursor: pointer;">Reload Page</a>
+    <app-edit-server [InputId]="userId"></app-edit-server>
+    <hr>
+    <app-server></app-server>
+  </div>
+</div>
+
+and that was the serves.html 
+
+<div class="form-group">
+  <label for="name">Server Name</label>
+  <input
+    type="text"
+    id="name"
+    class="form-control"
+    [(ngModel)]="serverName">
+</div>
+<div class="form-group">
+  <label for="status">Server Status</label>
+  <select
+    id="status"
+    class="form-control"
+    [(ngModel)]="serverStatus">
+    <option value="online">Online</option>
+    <option value="offline">Offline</option>
+  </select>
+</div>
+<button
+  class="btn btn-primary"
+  (click)="onUpdateServer()">Update Server</button>
+
+and that is the edit-server.html
+
+import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+
+import { ServersService } from '../servers.service';
+
+@Component({
+  selector: 'app-edit-server',
+  templateUrl: './edit-server.component.html',
+  styleUrls: ['./edit-server.component.css']
+})
+export class EditServerComponent implements OnInit {
+  @Input() InputId!: number;
+
+  server!: {id: number, name: string, status: string};
+  serverName = '';
+  serverStatus = '';
+
+  constructor(private serversService: ServersService) { }
+
+  ngOnInit() {
+    this.server = this.serversService.getServer(this.InputId);
+    this.serverName = this.server.name;
+    this.serverStatus = this.server.status;
+  }
+
+  onUpdateServer() {
+    this.serversService.updateServer(this.server.id, {name: this.serverName, status: this.serverStatus});
+  }
+
+}
+
+
+and that was the edit-server.ts
+
+why does always the InputId always undefined
